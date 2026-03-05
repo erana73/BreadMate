@@ -34,113 +34,108 @@
 
 ## Feature Breakdown & Phases
 
-### Phase 1 — Foundation (Week 1)
+### Phase 1 — Foundation ✅
 > Goal: Project scaffold, core data models, basic UI shell
 
-- [ ] **1.1** Initialize project with Vite + React + TypeScript + Tailwind
-- [ ] **1.2** Define data models:
+- [x] **1.1** Initialize project with Vite + React + TypeScript + Tailwind
+- [x] **1.2** Define data models:
   - `Recipe` (name, flour type, bread type, hydration%, ingredients[], steps[], leavening, kneading method, complexity)
   - `Starter` (name, flour type, created date, feedings[])
   - `Feeding` (timestamp, flour amount, water amount, starter amount, notes)
   - `BakeSession` (recipe ref, start time, step progress, timer states)
-- [ ] **1.3** Set up IndexedDB with Dexie.js for local persistence
-- [ ] **1.4** Build app shell: navigation, main layout, responsive design
-- [ ] **1.5** Create routing: Home, New Bake, My Recipes, Starter Log, Active Bake
+- [x] **1.3** Set up IndexedDB with Dexie.js for local persistence
+- [x] **1.4** Build app shell: navigation, main layout, responsive design
+- [x] **1.5** Create routing: Home, New Bake, My Recipes, Starter Log, Active Bake
 
 **Prompt for Claude Code:**
 > "Initialize a Vite + React + TypeScript project with Tailwind CSS. Set up the folder structure with pages (Home, NewBake, MyRecipes, StarterLog, ActiveBake), a components folder, and a models folder. Install Dexie.js. Create TypeScript interfaces for Recipe, Starter, Feeding, and BakeSession. Set up React Router with routes for each page."
 
 ---
 
-### Phase 2 — Recipe Builder (Week 2)
+### Phase 2 — Recipe Builder ✅
 > Goal: User can select parameters and get an adjusted recipe
 
-- [ ] **2.1** Build the recipe parameter selection form:
-  - Flour type (white, whole wheat, spelt, rye, etc.)
-  - Bread type (sandwich loaf, artisan boule, focaccia, challah, bagels, pizza dough, etc.)
-  - Kneading method (traditional hand knead, stand mixer, stretch & fold, no-knead)
+- [x] **2.1** Build the recipe parameter selection form:
+  - Flour type (9 types: bread, all-purpose, whole wheat, spelt, whole spelt, rye, whole rye, einkorn, gluten-free)
+  - Bread type (sandwich loaf, artisan boule, focaccia, pizza dough, bagels)
+  - Kneading method (hand knead, stand mixer, stretch & fold, no-knead)
   - Leavening (active dry yeast, instant yeast, sourdough starter, hybrid)
   - Complexity (beginner / intermediate / advanced)
-- [ ] **2.2** Build the rule-based recipe engine:
-  - Base recipe lookup table (one per bread type)
-  - Adjustment rules for hydration by flour type
-  - Adjustment rules for fermentation times by leavening type
-  - Kneading instructions by method
-  - Complexity filtering (hide/show advanced steps)
-- [ ] **2.3** Display the generated recipe: ingredients list (scaled), step-by-step instructions
-- [ ] **2.4** Add "Save Recipe" to local storage
-- [ ] **2.5** Add "Custom Recipe" input form for user-created recipes
+- [x] **2.2** Build the rule-based recipe engine (`src/lib/recipeEngine.ts`):
+  - Base recipe lookup table (`src/data/baseRecipes.ts`) — one per bread type
+  - Hydration adjustment by flour type
+  - Fermentation time multipliers by leavening type
+  - Sourdough/hybrid levain prep steps prepended automatically
+  - Kneading instruction overrides by method
+  - Complexity step-count filtering
+- [x] **2.3** Display the generated recipe: ingredients list (scaled), step-by-step instructions (`src/components/RecipeCard.tsx`)
+- [x] **2.4** Save Recipe to IndexedDB via Dexie
+- [ ] **2.5** Custom Recipe input form for user-created recipes
 
 **Prompt for Claude Code:**
 > "Create a recipe builder page. The user selects flour type, bread type, kneading method, leavening type, and complexity level from dropdowns. Build a rule-based engine that takes these parameters and generates an adjusted recipe. Store base recipes as JSON data. The engine should adjust hydration percentages, fermentation times, kneading instructions, and ingredient quantities. Display the result as a formatted recipe card with ingredients and steps. Add a 'Save Recipe' button that stores to IndexedDB via Dexie."
 
 ---
 
-### Phase 3 — AI Recipe Enhancement (Week 2-3)
+### Phase 3 — AI Recipe Enhancement ✅
 > Goal: Claude API integration for custom/complex requests
 
-- [ ] **3.1** Add "Ask AI" button for when rule-based engine doesn't have a good match
-- [ ] **3.2** Build Claude API integration:
+- [x] **3.1** "✨ Ask AI for Recipe" button on New Bake page
+- [x] **3.2** Claude API integration (`src/lib/aiRecipe.ts`):
   - System prompt with baking expertise context
-  - Send user parameters + any custom notes
-  - Parse structured recipe response
-- [ ] **3.3** Add custom request text field ("I want a gluten-free sourdough with seeds")
-- [ ] **3.4** Display AI-generated recipe in same format as rule-based
-- [ ] **3.5** Allow saving AI recipes to local library
+  - Sends selected parameters + optional custom notes
+  - Parses structured JSON recipe response (robust extraction tolerating markdown fences)
+  - Sourdough/hybrid: AI prompted to include levain build + readiness steps
+  - `VITE_ANTHROPIC_API_KEY` env var; model `claude-sonnet-4-6`, 4096 max tokens
+- [x] **3.3** Custom request text field on New Bake form
+- [x] **3.4** AI recipe displayed in same RecipeCard format
+- [x] **3.5** Save AI recipes to IndexedDB; source tagged as `ai-generated`
 
-**Prompt for Claude Code:**
-> "Add an AI recipe feature. When the user clicks 'Ask AI for Recipe', send their selected parameters plus an optional free-text request to the Anthropic API. Use a system prompt that instructs Claude to return a structured JSON recipe matching our Recipe interface. Parse the response and display it in the same recipe card format. Add a text input for custom requests like 'add seeds and honey'. Include loading state and error handling. The API key should be configurable via an environment variable."
-
-**Important note:** For the MVP, the API key will need to be handled carefully. Options to discuss: environment variable during development, or a simple backend proxy later.
+**Note:** API key configured via `VITE_ANTHROPIC_API_KEY` in `.env`. See `.env.example`.
 
 ---
 
-### Phase 4 — Bake Mode with Timers (Week 3)
+### Phase 4 — Bake Mode with Timers ✅
 > Goal: Guided baking experience with timers and notifications
 
-- [ ] **4.1** Build "Start Bake" flow from any saved recipe
-- [ ] **4.2** **Guided mode:**
-  - Show one step at a time
-  - Auto-start timer when step has a duration
-  - "Next Step" button
-  - Progress bar
-- [ ] **4.3** **Overview mode:**
-  - Show all steps
-  - Manual start/pause/reset per timer
-  - Highlight current step
-- [ ] **4.4** Toggle between guided and overview modes
-- [ ] **4.5** Timer features:
-  - Countdown display (hours:minutes:seconds)
-  - Audio alert when timer completes
-  - Browser notification when timer completes
-  - "Snooze 5 min" option
-- [ ] **4.6** Request notification permission on first use
-- [ ] **4.7** Persist bake session state (survive page refresh)
-
-**Prompt for Claude Code:**
-> "Build an ActiveBake page. When the user starts a bake from a recipe, create a BakeSession. Implement two modes: Guided (shows one step at a time with auto-timers and a progress bar) and Overview (shows all steps with individual timer controls). Each timer shows countdown in HH:MM:SS, plays an audio alert on completion, and sends a browser notification. Add a mode toggle. Persist the session state to IndexedDB so it survives page refresh. Include pause/resume and 'snooze 5 min' for completed timers."
+- [x] **4.1** "Start Bake" from My Recipes; "Save & Start Bake" from RecipeCard on New Bake
+- [x] **4.2** **Guided mode** (`src/pages/ActiveBake.tsx`):
+  - One step at a time with full instruction displayed
+  - Timer auto-starts on arrival at each timer step
+  - "Next Step" / "Skip" / "Finish Bake" button
+  - Progress bar (% complete)
+- [x] **4.3** **Overview mode:**
+  - All steps listed; click any step to jump to it
+  - Timer controls shown for the active step
+  - Inline countdown shown for all running timers
+  - Past steps marked with ✓
+- [x] **4.4** Mode toggle button (Guided ↔ Overview)
+- [x] **4.5** Timer features:
+  - MM:SS / H:MM:SS countdown display
+  - Web Audio API beep on completion
+  - Browser notification on completion
+  - Start / Pause / Resume / Reset / Snooze 5 min
+- [x] **4.6** Notification permission requested on first bake
+- [x] **4.7** BakeSession persisted to IndexedDB every 5 s; restored on page refresh; active session resumed automatically
 
 ---
 
-### Phase 5 — Sourdough Starter Log (Week 4)
+### Phase 5 — Sourdough Starter Log ✅
 > Goal: Track and manage sourdough starters with reminders
 
-- [ ] **5.1** Create starter management page:
-  - Add new starter (name, flour type, creation date)
-  - List all starters with status
-- [ ] **5.2** Feeding log per starter:
-  - Log feeding: flour amount, water amount, starter amount retained, timestamp
-  - Feeding history table (sortable by date)
-- [ ] **5.3** Feeding schedule & reminders:
-  - Set feeding interval (e.g., every 12h, every 24h)
-  - Calculate next feeding due time
-  - Browser notification when feeding is due
-  - Visual indicator: "Healthy" / "Due" / "Overdue"
-- [ ] **5.4** Support multiple starters
-- [ ] **5.5** Quick-log: "Fed now" button with default ratios
-
-**Prompt for Claude Code:**
-> "Build a Sourdough Starter Log page. Users can create multiple starters (name, flour type, creation date). Each starter has a feeding log where users record flour amount (g), water amount (g), starter retained (g), and timestamp. Display feeding history in a table. Add a feeding schedule: user sets interval (12h/24h/custom), the app calculates when the next feeding is due, and shows status as Healthy/Due/Overdue with color coding. Send browser notifications when feeding is due. Add a 'Fed Now' quick button that logs a feeding with the starter's default ratios. Store everything in IndexedDB."
+- [x] **5.1** Starter management page (`src/pages/StarterLog.tsx`):
+  - Add new starter (name, flour type, feeding interval, default ratio)
+  - Collapsible starter cards listing all starters with status
+- [x] **5.2** Feeding log per starter:
+  - Log Feeding form (starter retained, flour, water, timestamp, notes)
+  - Feeding history table sorted newest-first with delete per entry
+- [x] **5.3** Feeding schedule & reminders:
+  - Editable feeding interval per starter (8h / 12h / 24h / 48h / 72h)
+  - Next due time calculated from last feeding
+  - Browser notification fired on page load if overdue; scheduled if due within 24h
+  - Status badge: **Healthy** (green) / **Due Soon** (yellow, <2h) / **Overdue** (red)
+- [x] **5.4** Multiple starters supported
+- [x] **5.5** "Fed Now" quick button — logs feeding instantly with starter's default ratio
 
 ---
 
